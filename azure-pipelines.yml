@@ -1,0 +1,132 @@
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+    - release/*
+  paths:
+    exclude:
+    - /*.md
+    - .gitignore
+
+pr:
+  branches:
+    include:
+    - master
+    - develop
+    - release/*
+  autoCancel: true
+
+# add nf-tools repo to resources (for Azure Pipelines templates)
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: nanoframework/nf-tools
+      endpoint: nanoframework
+
+jobs:
+
+##############################
+- job: Get_Build_Options
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+  - checkout: self
+
+# build tools
+- job: Build_tools
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  variables:
+    buildPlatform: 'Any CPU'
+    buildConfiguration: 'Release'
+    solution: 'source\nanoFramework.Tools.Hex2Dfu.sln'
+    toolName: 'HEX2DFU utility'
+
+  steps:
+
+  # need this here in order to persist GitHub credentials
+  - checkout: self
+    persistCredentials: true
+
+  - script: |
+      git config --global user.email "nanoframework@outlook.com"
+      git config --global user.name "nfbot"
+    displayName: Setup git identity
+
+  - task: NuGetToolInstaller@0
+
+  - task: NuGetCommand@2
+    inputs:
+      restoreSolution: '$(solution)'
+      verbosityRestore: quiet
+
+  - task: VSBuild@1
+    inputs:
+      solution: '$(solution)'
+      platform: '$(buildPlatform)'
+      configuration: '$(buildConfiguration)'
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\bin\Release\*.exe
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      flattenFolders: true
+    condition: succeeded()
+    displayName: Collecting deployable artifacts
+
+  # publish artifacts (only possible if this is not a PR originated on a fork)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: deployables
+      ArtifactType: Container
+    condition: and( succeeded(), ne(variables['system.pullrequest.isfork'], true) )
+    displayName: Publish deployables artifacts
+
+  # create or update GitHub release
+  - task: GitHubReleasePublish@1
+    inputs:
+      githubEndpoint: 'nanoFramework'
+      githubOwner: 'nanoframework'
+      githubRepositoryName: 'nf-tool-hex2dfu'
+      githubTag: v$(NBGV_Version)
+      githubReleaseTitle: 'nanoFramework hex2dfu v$(NBGV_Version)'
+      githubReleaseNotes: 'add description here'
+      githubTargetCommitsh: $(Build.SourceVersion)
+      githubReleaseDraft: true
+      githubReleasePrerelease: false
+      githubReuseDraftOnly: true
+      githubReuseRelease: true
+      githubEditRelease: true
+      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/*.exe'
+    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ) )
+    displayName: Create/Update GitHub release
+
+##################################
+# report build failure to Discord
+- job: Report_Build_Failure
+  dependsOn:
+  - Build_tools
+  condition: failed('Build_tools')
+
+  pool:
+    vmImage: 'VS2017-Win2016'
+
+  steps:
+
+  - checkout: self
+    fetchDepth: 1
+
+  # step from template @ nf-tools repo
+  - template: azure-pipelines-templates/discord-webhook.yml@templates  
+    parameters:
+      status: 'failure'
+      webhookUrl: '$(DiscordWebhook)'
+      message: ''
