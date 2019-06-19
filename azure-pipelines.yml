@@ -95,7 +95,7 @@ jobs:
     inputs:
       githubEndpoint: 'nanoFramework'
       githubOwner: 'nanoframework'
-      githubRepositoryName: 'nf-tool-hex2dfu'
+      githubRepositoryName: 'hex2dfu'
       githubTag: v$(NBGV_Version)
       githubReleaseTitle: 'nanoFramework hex2dfu v$(NBGV_Version)'
       githubReleaseNotes: 'add description here'
