@@ -96,8 +96,8 @@ jobs:
       githubEndpoint: 'nanoFramework'
       githubOwner: 'nanoframework'
       githubRepositoryName: 'hex2dfu'
-      githubTag: v$(NBGV_Version)
-      githubReleaseTitle: 'nanoFramework hex2dfu v$(NBGV_Version)'
+      githubTag: v$(GitBuildVersionSimple)
+      githubReleaseTitle: 'nanoFramework hex2dfu v$(GitBuildVersionSimple)'
       githubReleaseNotes: 'add description here'
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: true
