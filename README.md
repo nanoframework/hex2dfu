@@ -6,9 +6,60 @@
 
 ### Welcome to the **nanoFramework** HEX2DFU tool repository!
 
-This repo contains the Hex2Dfu tool. 
+This repo contains the Hex2Dfu tool.
 It's a console app to convert and/or pack HEX or BIN files in DFU packages (required to update some target boards).
 Is part of **nanoFramework** toolbox, along with other various tools that are required in **nanoFramework** development, usage or repository management.
+
+## Usage
+
+### Create a DFU file from a single hex file
+
+To create a DFU package from a single hex file use the following command line:
+
+```cmd
+hex2dfu -h=hex_file_name -o=output_DFU_image_file_name
+
+```
+
+### Create a DFU file from one or more bin files
+
+To create a DFU package from one (or more) bin files use the following command line:
+
+```cmd
+hex2dfu -b=bin_file_name -a=address_to_flash [-b=bin_file_name_N -a=address_to_flash_N] -o=output_DFU_image_file_name
+
+```
+
+### Optional parameters
+
+The following parameters are available and are optional.
+
+#### Set the VID of target USB device
+
+Allows setting the VID of the USB device. Hexadecimal format. If not specified the STM default will be used. Usually used in conjunction with PID.
+
+```cmd
+hex2dfu -h=hex_file_name -o=output_DFU_image_file_name [-v="0000"]
+
+```
+
+#### Set the PID of target USB device
+
+Allows setting the PID of the USB device. Hexadecimal format. If not specified the STM default will be used. Usually used in conjunction with VID.
+
+```cmd
+hex2dfu -h=hex_file_name -o=output_DFU_image_file_name [-p="0000"]
+
+```
+
+#### Set the firmware version of the target device
+
+Allows setting the firmware version of the target device. Hexadecimal format. If not specified the STM default will be used. Can be used by the DFU tool to check for a valid device to update.
+
+```cmd
+hex2dfu -h=hex_file_name -o=output_DFU_image_file_name [-f=""0000""]
+
+```
 
 ## Feedback and documentation
 
