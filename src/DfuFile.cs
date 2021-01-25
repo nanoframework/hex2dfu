@@ -93,7 +93,7 @@ namespace nanoFramework.Tools
             ser.AddRange(DfuSuffix.Serialize());
             var retSer = ser.ToArray();
             // Now need to adjust the size and calculate the CRC
-            DfuPrefix.ImageSize = (uint)retSer.Length - 274;
+            DfuPrefix.ImageSize = (uint)retSer.Length;
             BinaryPrimitives.WriteUInt32LittleEndian(retSer.AsSpan(6, 4), DfuPrefix.ImageSize);
             uint crc = 0;
             crc = (uint)(0xFFFFFFFF & -Crc32(crc, retSer.AsSpan(0, retSer.Length - 4)) - 1);

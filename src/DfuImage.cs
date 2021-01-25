@@ -40,7 +40,7 @@ namespace nanoFramework.Tools
             }
 
             TargetPrefix.NumberOfElements = (uint)ImageElements.Count;
-            TargetPrefix.TargetSize = (uint)(274 + elements.Count);
+            TargetPrefix.TargetSize = (uint)(elements.Count);
             ser.AddRange(TargetPrefix.Serialize());
             ser.AddRange(elements);
             return ser.ToArray();
