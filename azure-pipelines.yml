@@ -145,7 +145,7 @@ jobs:
       githubOwner: 'nanoframework'
       githubRepositoryName: 'hex2dfu'
       githubTag: v$(GitBuildVersionSimple)
-      githubReleaseTitle: 'nanoFramework hex2dfu v$(GitBuildVersionSimple)'
+      githubReleaseTitle: '.NET nanoFramework hex2dfu v$(GitBuildVersionSimple)'
       githubReleaseNotes: 'add description here'
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: true
@@ -153,7 +153,7 @@ jobs:
       githubReuseDraftOnly: true
       githubReuseRelease: true
       githubEditRelease: true
-      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/*.exe'
+      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/*'
     condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ) )
     displayName: Create/Update GitHub release
 
