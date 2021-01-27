@@ -1,11 +1,11 @@
 ﻿//
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) 2021 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Reflection;
 using Utility.CommandLine;
 
@@ -36,9 +36,9 @@ namespace nanoFramework.Tools
         private static string FirmwareVersion { get; set; }
 
 
-        private static ushort _Vid => ushort.Parse(Vid, System.Globalization.NumberStyles.HexNumber);
-        private static ushort _Pid => ushort.Parse(Pid, System.Globalization.NumberStyles.HexNumber);
-        private static ushort _FirmwareVersion => ushort.Parse(FirmwareVersion, System.Globalization.NumberStyles.HexNumber);
+        private static ushort _Vid => ushort.Parse(Vid, NumberStyles.HexNumber);
+        private static ushort _Pid => ushort.Parse(Pid, NumberStyles.HexNumber);
+        private static ushort _FirmwareVersion => ushort.Parse(FirmwareVersion, NumberStyles.HexNumber);
 
         static void Main(string[] args)
         {
@@ -52,7 +52,7 @@ namespace nanoFramework.Tools
 
 
             // output usage help if no arguments are specified
-            if (args.Count() == 0)
+            if (args.Length == 0)
             {
                 Console.WriteLine("Usage:");
                 Console.WriteLine(" adding a single HEX file: hex2dfu -h=hex_file_name -o=output_DFU_image_file_name");
@@ -136,7 +136,7 @@ namespace nanoFramework.Tools
                 foreach (string file in BinFiles)
                 {
                     addressEnum.MoveNext();
-                    binFiles.Add(new BinaryFileInfo(file, uint.Parse(addressEnum.Current, System.Globalization.NumberStyles.HexNumber)));
+                    binFiles.Add(new BinaryFileInfo(file, uint.Parse(addressEnum.Current, NumberStyles.HexNumber)));
                 }
 
                 // compose the call to CreateDfuFile according to the requested parameters

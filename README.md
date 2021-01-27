@@ -7,8 +7,9 @@
 ### Welcome to the **nanoFramework** HEX2DFU tool repository!
 
 This repo contains the Hex2Dfu tool.
-It's a console app to convert and/or pack HEX or BIN files in DFU packages (required to update some target boards).
-Is part of **nanoFramework** toolbox, along with other various tools that are required in **nanoFramework** development, usage or repository management.
+It's a .NET 5 console app to convert and/or pack HEX or BIN files in DFU packages (required to update some target boards).
+It's part of **nanoFramework** toolbox, along with other various tools that are required in **nanoFramework** development, usage or repository management.
+There are prebuilt versions for Win64 and Linux.
 
 ## Usage
 

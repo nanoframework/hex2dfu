@@ -1,21 +1,12 @@
 trigger:
   branches:
-    include:
-    - master
-    - develop
-    - release/*
+    include: [master, develop, "release-*" ]
   paths:
-    exclude:
-    - /*.md
-    - .gitignore
+    exclude: ["*.md", .gitignore]
+  tags:
+    include: ["v*"]
 
-pr:
-  branches:
-    include:
-    - master
-    - develop
-    - release/*
-  autoCancel: true
+# PR always trigger build
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
@@ -28,23 +19,16 @@ resources:
 jobs:
 
 ##############################
-- job: Get_Build_Options
-  pool:
-    vmImage: 'VS2017-Win2016'
-
-  steps:
-  - checkout: self
-
 # build tools
 - job: Build_tools
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-2019'
 
   variables:
     buildPlatform: 'Any CPU'
     buildConfiguration: 'Release'
-    solution: 'source\nanoFramework.Tools.Hex2Dfu.sln'
+    solution: 'nanoFramework.Tools.Hex2Dfu.sln'
     toolName: 'HEX2DFU utility'
 
   steps:
@@ -65,17 +49,68 @@ jobs:
       restoreSolution: '$(solution)'
       verbosityRestore: quiet
 
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 5.x
+       
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build Linux version'
+    inputs:
+      command: 'publish'
+      publishWebProjects: 'false'
+      projects: '**/hex2dfu.csproj'
+      arguments: '-p:PublishProfile=linux-build.pubxml -p:PlatformTarget=x64 -c Release'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build Windows version'
+    inputs:
+      command: 'publish'
+      publishWebProjects: 'false'
+      projects: '**/hex2dfu.csproj'
+      arguments: '-p:PublishProfile=win64-build.pubxml -p:PlatformTarget=x64 -c Release'
+
   - task: VSBuild@1
     inputs:
       solution: '$(solution)'
       platform: '$(buildPlatform)'
+      msbuildArgs: '/p:PublicRelease=true'
       configuration: '$(buildConfiguration)'
+  
+  - task: VisualStudioTestPlatformInstaller@1
+    condition: succeeded()
+    displayName: 'Visual Studio Test Platform Installer'
+    inputs:
+      versionSelector: latestStable
 
+  - task: VSTest@2
+    condition: succeeded()
+    displayName: 'Running tests'
+    inputs:
+      testSelector: 'testAssemblies'
+      testAssemblyVer2: |
+        **\bin\$(BuildConfiguration)\**\*test*.dll
+        !**\obj\**
+        !**\bin\**\ref\**
+        !**\*TestAdapter.dll
+        !**\*testhost.dll
+        !**\*TestPlatform*.dll
+        !**\xunit.runner.visualstudio.testadapter.dll
+        !**\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+      diagnosticsEnabled: true
+      vsTestVersion: toolsInstaller
+      codeCoverageEnabled: true
+    
   - task: CopyFiles@1
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
-        **\bin\Release\*.exe
+        **\publish\win64\hex2dfu*
+        **\publish\linux\hex2dfu*.exe
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
     condition: succeeded()
