@@ -27,7 +27,7 @@ jobs:
 
   variables:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-    buildPlatform: 'Any CPU'
+    buildPlatform: 'x64'
     buildConfiguration: 'Release'
     solution: 'nanoFramework.Tools.Hex2Dfu.sln'
     toolName: 'HEX2DFU utility'
@@ -90,7 +90,7 @@ jobs:
       platform: '$(buildPlatform)'
       msbuildArgs: '/p:PublicRelease=true'
       configuration: '$(buildConfiguration)'
-  
+    
   - task: VisualStudioTestPlatformInstaller@1
     condition: succeeded()
     displayName: 'Visual Studio Test Platform Installer'
@@ -103,7 +103,7 @@ jobs:
     inputs:
       testSelector: 'testAssemblies'
       testAssemblyVer2: |
-        **\bin\$(BuildConfiguration)\**\*test*.dll
+        **\$(BuildConfiguration)\**\*test*.dll
         !**\obj\**
         !**\bin\**\ref\**
         !**\*TestAdapter.dll
@@ -118,16 +118,16 @@ jobs:
       vsTestVersion: toolsInstaller
       codeCoverageEnabled: true
     
-  - task: CopyFiles@1
+  - task: CopyFiles@2
+    displayName: Collecting deployable artifacts
+    condition: succeeded()
     inputs:
-      sourceFolder: $(Build.SourcesDirectory)
+      SourceFolder: '$(Build.SourcesDirectory)\source\bin\Release\net5.0'
       Contents: |
-        **\publish\win64\hex2dfu*.exe
-        **\publish\linux\hex2dfu
+        **\linux-x64\*hex2dfu
+        **\win-x64\*hex2*.exe
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
-    condition: succeeded()
-    displayName: Collecting deployable artifacts
 
   # publish artifacts (only possible if this is not a PR originated on a fork)
   - task: PublishBuildArtifacts@1
