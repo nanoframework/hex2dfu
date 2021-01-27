@@ -49,6 +49,12 @@ jobs:
     inputs:
       restoreSolution: '$(solution)'
       verbosityRestore: quiet
+  
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 5.x
 
   - task: DotNetCoreCLI@2  
     condition: ne(variables['system.pullrequest.isfork'], true)
@@ -61,13 +67,7 @@ jobs:
   - script: nbgv cloud -a -c
     condition: ne(variables['system.pullrequest.isfork'], true)
     displayName: Set build number
-  
-  - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk'
-    inputs:
-      packageType: sdk
-      version: 5.x
-       
+
   - task: DotNetCoreCLI@2
     displayName: 'dotnet build Linux version'
     inputs:
