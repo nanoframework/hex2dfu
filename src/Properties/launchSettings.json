@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "hex2dfu": {
+      "commandName": "Project",
+      "commandLineArgs": "-h=nanoCLR.hex -o=nanoCLR.dfu"
+    }
+  }
+}
