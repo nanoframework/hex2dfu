@@ -26,6 +26,7 @@ jobs:
     vmImage: 'windows-2019'
 
   variables:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
     buildPlatform: 'Any CPU'
     buildConfiguration: 'Release'
     solution: 'nanoFramework.Tools.Hex2Dfu.sln'
@@ -49,6 +50,18 @@ jobs:
       restoreSolution: '$(solution)'
       verbosityRestore: quiet
 
+  - task: DotNetCoreCLI@2  
+    condition: ne(variables['system.pullrequest.isfork'], true)
+    displayName: Install NBGV tool
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
+  
+  - script: nbgv cloud -a -c
+    condition: ne(variables['system.pullrequest.isfork'], true)
+    displayName: Set build number
+  
   - task: UseDotNet@2
     displayName: 'Use .NET Core sdk'
     inputs:
