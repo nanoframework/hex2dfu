@@ -122,8 +122,8 @@ jobs:
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
-        **\publish\win64\hex2dfu*
-        **\publish\linux\hex2dfu*.exe
+        **\publish\win64\hex2dfu*.exe
+        **\publish\linux\hex2dfu
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
     condition: succeeded()
