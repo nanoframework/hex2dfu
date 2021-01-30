@@ -83,6 +83,17 @@ jobs:
       publishWebProjects: 'false'
       projects: '**/hex2dfu.csproj'
       arguments: '-p:PublishProfile=win64-build.pubxml -p:PlatformTarget=x64 -c Release'
+  
+  - task: CopyFiles@2
+    displayName: Collecting deployable artifacts
+    condition: succeeded()
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)\source'
+      Contents: |
+        **\linux\*hex2dfu
+        **\win64\*hex2*.exe
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      flattenFolders: true
 
   - task: VSBuild@1
     inputs:
@@ -117,17 +128,6 @@ jobs:
       diagnosticsEnabled: true
       vsTestVersion: toolsInstaller
       codeCoverageEnabled: true
-    
-  - task: CopyFiles@2
-    displayName: Collecting deployable artifacts
-    condition: succeeded()
-    inputs:
-      SourceFolder: '$(Build.SourcesDirectory)\source\bin\Release\net5.0'
-      Contents: |
-        **\linux-x64\*hex2dfu
-        **\win-x64\*hex2*.exe
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      flattenFolders: true
 
   # publish artifacts (only possible if this is not a PR originated on a fork)
   - task: PublishBuildArtifacts@1
