@@ -82,7 +82,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        dotnet publish $(Build.SourcesDirectory)\source\hex2dfu.csproj -r win-x64 -p:PublishSingleFile=true --self-contained true -c Release
+        dotnet publish $(Build.SourcesDirectory)\source\hex2dfu.csproj -r win-x64 -p:PublishSingleFile=true --self-contained false -c Release
   
   - task: CopyFiles@2
     displayName: Collecting deployable artifacts
