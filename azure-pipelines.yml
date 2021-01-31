@@ -68,21 +68,19 @@ jobs:
     condition: ne(variables['system.pullrequest.isfork'], true)
     displayName: Set build number
 
-  - task: DotNetCoreCLI@2
+    - task: PowerShell@2
     displayName: 'dotnet build Linux version'
     inputs:
-      command: 'publish'
-      publishWebProjects: 'false'
-      projects: '**/hex2dfu.csproj'
-      arguments: '-p:PublishProfile=linux-build.pubxml -p:PlatformTarget=x64 -c Release'
+      targetType: 'inline'
+      script: |
+        dotnet publish $(Build.SourcesDirectory)\source\hex2dfu.csproj -r linux-x64 -p:PublishSingleFile=true --self-contained true -c Release
 
-  - task: DotNetCoreCLI@2
+  - task: PowerShell@2
     displayName: 'dotnet build Windows version'
     inputs:
-      command: 'publish'
-      publishWebProjects: 'false'
-      projects: '**/hex2dfu.csproj'
-      arguments: '-p:PublishProfile=win64-build.pubxml -p:PlatformTarget=x64 -c Release'
+      targetType: 'inline'
+      script: |
+        dotnet publish $(Build.SourcesDirectory)\source\hex2dfu.csproj -r win-x64 -p:PublishSingleFile=true --self-contained true -c Release
   
   - task: CopyFiles@2
     displayName: Collecting deployable artifacts
@@ -90,8 +88,8 @@ jobs:
     inputs:
       SourceFolder: '$(Build.SourcesDirectory)\source'
       Contents: |
-        **\linux\*hex2dfu
-        **\win64\*hex2*.exe
+        **\linux-x64\publish\*hex2dfu
+        **\win-x64\publish\*hex2*.exe
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
 
