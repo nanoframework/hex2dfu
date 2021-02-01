@@ -154,7 +154,7 @@ jobs:
       githubReuseRelease: true
       githubEditRelease: true
       githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/*'
-    condition: and( succeeded(), not( startsWith(variables['Build.SourceBranch'], 'refs/pull') ) )
+      condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) )
     displayName: Create/Update GitHub release
 
 ##################################
