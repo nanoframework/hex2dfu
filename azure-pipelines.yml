@@ -1,8 +1,8 @@
 trigger:
   branches:
-    include: [main, master, develop, "release-*" ]
+    include: [main, develop, "release-*" ]
   paths:
-    exclude: ["*.md", .gitignore]
+    exclude: [README.md, LICENSE.md, .gitignore]
   tags:
     include: ["v*"]
 
@@ -26,7 +26,7 @@ jobs:
     vmImage: 'windows-2019'
 
   variables:
-    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    DOTNET_NOLOGO: true
     buildPlatform: 'x64'
     buildConfiguration: 'Release'
     solution: 'nanoFramework.Tools.Hex2Dfu.sln'
@@ -43,7 +43,7 @@ jobs:
       git config --global user.name "nfbot"
     displayName: Setup git identity
 
-  - task: NuGetToolInstaller@0
+  - template: azure-pipelines-templates/install-nuget.yml@templates
 
   - task: NuGetCommand@2
     inputs:
@@ -160,9 +160,10 @@ jobs:
 ##################################
 # report build failure to Discord
 - job: Report_Build_Failure
+  condition: failed('Build_tools')
+
   dependsOn:
   - Build_tools
-  condition: failed('Build_tools')
 
   pool:
     vmImage: 'VS2017-Win2016'
