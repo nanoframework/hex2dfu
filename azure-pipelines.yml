@@ -23,7 +23,7 @@ jobs:
 - job: Build_tools
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   variables:
     DOTNET_NOLOGO: true
@@ -160,13 +160,17 @@ jobs:
 ##################################
 # report build failure to Discord
 - job: Report_Build_Failure
-  condition: failed('Build_tools')
 
   dependsOn:
-  - Build_tools
-
+  - VS2019
+  - VS2022
+  condition: >-
+    or(
+      failed('VS2019'),
+      failed('VS2022')
+    )
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-latest'
 
   steps:
 
@@ -174,6 +178,7 @@ jobs:
     fetchDepth: 1
 
   # step from template @ nf-tools repo
+  # report error
   - template: azure-pipelines-templates/discord-webhook.yml@templates  
     parameters:
       status: 'failure'
