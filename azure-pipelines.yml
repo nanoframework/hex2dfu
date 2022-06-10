@@ -162,13 +162,9 @@ jobs:
 - job: Report_Build_Failure
 
   dependsOn:
-  - VS2019
-  - VS2022
-  condition: >-
-    or(
-      failed('VS2019'),
-      failed('VS2022')
-    )
+  - build_tools
+  condition: failed('build_tools'),
+
   pool:
     vmImage: 'windows-latest'
 
