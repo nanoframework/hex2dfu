@@ -162,8 +162,8 @@ jobs:
 - job: Report_Build_Failure
 
   dependsOn:
-  - build_tools
-  condition: failed('build_tools'),
+  - Build_tools
+  condition: failed('Build_tools'),
 
   pool:
     vmImage: 'windows-latest'
