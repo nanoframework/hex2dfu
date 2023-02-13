@@ -66,8 +66,8 @@ namespace nanoFramework.Tools
         {
             byte[] ser = new byte[274];
             Encoding.ASCII.GetBytes(Signature).CopyTo(ser, 0);
-            ser[6] = AlternateSetting ? 1 : 0;
-            ser[7] = IsTargetName ? 1 : 0;
+            ser[6] = AlternateSetting ? (byte)1 : (byte)0;
+            ser[7] = IsTargetName ? (byte)1 : (byte)0;
             if (IsTargetName)
             {
                 Encoding.ASCII.GetBytes(TargetName).CopyTo(ser, 11);
