@@ -55,21 +55,16 @@ namespace nanoFramework.Tools
             }
 
             Crc = data[data.Length - 1];
-            if (data.Length > 5)
-            {
-                IsValidRecord = CheckCrc(data);
-                NumberOfBytes = data[0];
-                Address = BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan().Slice(1, 2));
-                HexFieldType = (HexFieldType)data[3];
-                Data = new byte[NumberOfBytes];
-                data.AsSpan(4, NumberOfBytes).CopyTo(Data);
-            }
-            else
-            {
-                Crc = data[4];
-                IsValidRecord = Crc == 0xFF;
-            }
+            IsValidRecord = CheckCrc(data);
+
+            NumberOfBytes = data[0];
+            Address = BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan().Slice(1, 2));
+            HexFieldType = (HexFieldType)data[3];
+            Data = new byte[NumberOfBytes];            
+            if (NumberOfBytes > 0) // no data bytes in the end of file line.
+                data.AsSpan(4, NumberOfBytes).CopyTo(Data);            
         }
+        
         private byte[] ConvertHex2Bin(string input)
         {
             if (input.Length < 1)
@@ -91,12 +86,13 @@ namespace nanoFramework.Tools
 
         private bool CheckCrc(byte[] data)
         {
-            var crc = 0;
-            for (int i = 0; i < data.Length; i++)
+            int crc = 0;
+            for (int i = 0; i < data.Length - 1; i++) // crc is calculated for all data but the last byte (checksum)
             {
                 crc += data[i];
             }
-            return crc % 256 == 0;
+            // Two's complement on checksum
+            return (byte)(~crc + 1) == data[data.Length - 1];
         }
     }
 }
