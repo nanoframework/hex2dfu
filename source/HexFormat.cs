@@ -61,8 +61,11 @@ namespace nanoFramework.Tools
             Address = BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan().Slice(1, 2));
             HexFieldType = (HexFieldType)data[3];
             Data = new byte[NumberOfBytes];            
-            if (NumberOfBytes > 0) // no data bytes in the end of file line.
-                data.AsSpan(4, NumberOfBytes).CopyTo(Data);            
+            // no data bytes in the end of file line.
+            if (NumberOfBytes > 0)
+            {
+                data.AsSpan(4, NumberOfBytes).CopyTo(Data);
+            }
         }
         
         private byte[] ConvertHex2Bin(string input)
@@ -87,7 +90,8 @@ namespace nanoFramework.Tools
         private bool CheckCrc(byte[] data)
         {
             int crc = 0;
-            for (int i = 0; i < data.Length - 1; i++) // crc is calculated for all data but the last byte (checksum)
+            // crc is calculated for all data but the last byte (checksum)
+            for (int i = 0; i < data.Length - 1; i++) 
             {
                 crc += data[i];
             }
