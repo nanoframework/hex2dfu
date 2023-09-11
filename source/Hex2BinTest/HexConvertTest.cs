@@ -53,8 +53,9 @@ namespace Hex2BinTest
             HexFormat hex = new HexFormat(endoffile);
             // Assert
             Assert.True(hex.IsValidRecord);
+            Assert.Equal(HexFieldType.EndOfFile, hex.HexFieldType);
             Assert.Equal(0, hex.NumberOfBytes);
-            Assert.Null(hex.Data);
+            Assert.Equal(0, hex.Data.Length);
         }
 
         [Fact]
