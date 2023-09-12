@@ -27,7 +27,7 @@ hex2dfu -h=hex_file_name -o=output_DFU_image_file_name
 To create a DFU package from one (or more) bin files use the following command line:
 
 ```cmd
-hex2dfu -b=bin_file_name -a=address_to_flash [-b=bin_file_name_N -a=address_to_flash_N] -o=output_DFU_image_file_name
+hex2dfu -b=bin_file_name -a=hex_address_to_flash [-b=bin_file_name_N -a=hex_address_to_flash_N] -o=output_DFU_image_file_name
 
 ```
 
