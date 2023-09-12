@@ -131,12 +131,16 @@ jobs:
 
   # publish artifacts (only possible if this is not a PR originated on a fork)
   - task: PublishBuildArtifacts@1
+    displayName: Publish deployables artifacts
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables['system.pullrequest.isfork'], true)
+      )
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: deployables
       ArtifactType: Container
-    condition: and( succeeded(), ne(variables['system.pullrequest.isfork'], true) )
-    displayName: Publish deployables artifacts
 
   # create or update GitHub release
   - task: GitHubReleasePublish@1
@@ -150,11 +154,16 @@ jobs:
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: true
       githubReleasePrerelease: false
-      githubReuseDraftOnly: true
+      githubReuseDraftOnly: false
       githubReuseRelease: true
-      githubEditRelease: true
+      githubEditRelease: false
       githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/*'
-      condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) )
+      condition: >-
+        and(
+          succeeded(),
+          eq(variables['System.PullRequest.PullRequestId'], ''),
+          not(startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+        )
     displayName: Create/Update GitHub release
 
 ##################################
