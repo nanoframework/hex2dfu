@@ -143,28 +143,31 @@ jobs:
       ArtifactType: Container
 
   # create or update GitHub release
-  - task: GitHubReleasePublish@1
-    inputs:
-      githubEndpoint: 'nanoFramework'
-      githubOwner: 'nanoframework'
-      githubRepositoryName: 'hex2dfu'
-      githubTag: v$(GitBuildVersionSimple)
-      githubReleaseTitle: '.NET nanoFramework hex2dfu v$(GitBuildVersionSimple)'
-      githubReleaseNotes: 'add description here'
-      githubTargetCommitsh: $(Build.SourceVersion)
-      githubReleaseDraft: true
-      githubReleasePrerelease: false
-      githubReuseDraftOnly: false
-      githubReuseRelease: true
-      githubEditRelease: false
-      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/*'
-      condition: >-
-        and(
-          succeeded(),
-          eq(variables['System.PullRequest.PullRequestId'], ''),
-          not(startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
-        )
+  - task: GithubRelease@1
     displayName: Create/Update GitHub release
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        startsWith(variables['Build.SourceBranch'], 'refs/heads/main'),
+      )
+    inputs:
+      gitHubConnection: 'github.com_nano-$(System.TeamProject)'
+      action: create
+      isDraft: false
+      tagSource: userSpecifiedTag
+      tag: v$(GitBuildVersionSimple)
+      title: '.NET nanoFramework hex2dfu v$(GitBuildVersionSimple)'
+      assets: '$(Build.ArtifactStagingDirectory)/*'
+      addChangeLog: true
+      changeLogLabels: |
+        [
+          { "label" : "Type: bug", "displayName" : "Bugs fixed", "state" : "closed" },
+          { "label" : "Type: enhancement", "displayName" : "Enhancements and new features", "state" : "closed" },
+          { "label" : "Breaking-Change", "displayName" : "Breaking Changes", "state" : "closed" }
+          { "label" : "Type: dependencies", "displayName" : "Dependencies updated", "state" : "closed" },
+          { "label" : "Type: documentation", "displayName" : "Documentation", "state" : "closed" }
+        ]      
 
 ##################################
 # report build failure to Discord
