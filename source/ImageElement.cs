@@ -5,7 +5,7 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Text;
+using System.Collections.Generic;
 
 namespace nanoFramework.Tools
 {
@@ -14,6 +14,11 @@ namespace nanoFramework.Tools
     /// </summary>
     public class ImageElement
     {
+        public ImageElement()
+        {
+            Data = new List<byte>();
+        }
+
         /// <summary>
         /// The Element Address
         /// </summary>
@@ -22,12 +27,12 @@ namespace nanoFramework.Tools
         /// <summary>
         /// The size of the Data
         /// </summary>
-        public uint ElementSize => Data != null ? (uint)Data.Length : 0;
+        public uint ElementSize => Data != null ? (uint)Data.Count : 0;
 
         /// <summary>
         /// The Data
         /// </summary>
-        public byte[] Data { get; set; }
+        public List<byte> Data { get; set; }
 
         /// <summary>
         /// Serialize the Image Element
