@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2021 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -58,6 +58,10 @@ namespace nanoFramework.Tools
                 {
                     offset = BinaryPrimitives.ReadUInt16BigEndian(hex.Data) << 4;
                 }
+                    else if (hex.HexFieldType == HexFieldType.ExtendedLinearAddressRecord)
+                    {
+                        offset = BinaryPrimitives.ReadUInt16BigEndian(hex.Data) << 16;
+                    }
                 else if (hex.HexFieldType == HexFieldType.EndOfFile)
                 {
                     break;
