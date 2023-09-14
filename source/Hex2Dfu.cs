@@ -30,15 +30,23 @@ namespace nanoFramework.Tools
         /// <returns>True if success</returns>
         public static bool CreateDfuFile(string hexFile, string dfuName, ushort vid = DefaultSTMVid, ushort pid = DefafultSTMPid, ushort fwVersion = DefaultFwVersion)
         {
+            // prepare target dfu file
+            DfuFile dfuFile = new();
+            DfuImage dfuImage = new();
+            dfuImage.TargetPrefix.TargetName = GetCleanName(dfuName);
+            ImageElement imageElement = new();
+
             using StreamReader reader = new StreamReader(hexFile);
-            using MemoryStream binDestination = new MemoryStream();
-            string hexLine = string.Empty;
-            long offset = 0;
-            long maxSize = 0;
+
             Console.WriteLine($"Converting HEX file {hexFile} to BIN format.");
+
+            // store last encountered extended address here to detect gaps in the memory mapping (multiple segments)
+            // Treat extended linear address the same way as extended segment address, assume both are not used in the same file.
+            uint lastAddressOffset = 0;
+
             while (reader.Peek() >= 0)
             {
-                hexLine = reader.ReadLine();
+                string hexLine = reader.ReadLine();
                 HexFormat hex = new HexFormat(hexLine);
                 if (!hex.IsValidRecord)
                 {
@@ -50,16 +58,45 @@ namespace nanoFramework.Tools
 
                 if (hex.HexFieldType == HexFieldType.Data)
                 {
-                    binDestination.Seek(offset + hex.Address, SeekOrigin.Begin);
-                    maxSize = maxSize < offset + hex.Address ? offset + hex.Address : maxSize;
-                    binDestination.Write(hex.Data);
+                    if (imageElement.Data.Count == 0)
+                    {
+                        // there may have been previous extended address record, add that base address
+                        imageElement.ElementAddress = lastAddressOffset;
+                        // first data record address is the lower 2 bytes of the memory start address.
+                        imageElement.ElementAddress += hex.Address;
+                    }
+
+                    // gap in the memory space map, create a new image element and add old one to the collection.
+                    // The gap can be caused by either extended address record or data address jump.
+                    if (hex.Address + lastAddressOffset > imageElement.ElementAddress + imageElement.Data.Count)
+                    {
+                        dfuImage.ImageElements.Add(imageElement);
+                        // create new element
+                        imageElement = new ImageElement
+                        {
+                            ElementAddress = lastAddressOffset + hex.Address
+                        };
+                    }
+
+                    imageElement.Data.AddRange(hex.Data);
                 }
-                else if (hex.HexFieldType == HexFieldType.ExtendedAddress)
+                else if (hex.HexFieldType == HexFieldType.ExtendedSegmentAddress)
                 {
-                    offset = BinaryPrimitives.ReadUInt16BigEndian(hex.Data) << 4;
+                    // ExtendedSegmentAddress record data if any is multiplied by 16 and added to the memory start address.
+                    lastAddressOffset = (uint)BinaryPrimitives.ReadUInt16BigEndian(hex.Data) << 4;
+                }
+                else if (hex.HexFieldType == HexFieldType.ExtendedLinearAddress)
+                {
+                    // these are 2 upper bytes of the 4-byte extended address
+                    lastAddressOffset = (uint)BinaryPrimitives.ReadUInt16BigEndian(hex.Data) << 16;
                 }
                 else if (hex.HexFieldType == HexFieldType.EndOfFile)
                 {
+                    if (imageElement.Data.Count > 0)
+                    {
+                        // add last element if any
+                        dfuImage.ImageElements.Add(imageElement);
+                    }
                     break;
                 }
             }
@@ -67,21 +104,7 @@ namespace nanoFramework.Tools
             // Close the reader
             reader.Close();
             reader.Dispose();
-            // Save the file result and close the memory stream and the file
-            using FileStream fs = new FileStream(hexFile + ".bin", FileMode.Create);
-            Span<byte> binFile = binDestination.GetBuffer().AsSpan(0, (int)maxSize);
-            binDestination.Close();
-            binDestination.Dispose();
-            fs.Write(binFile);
-            fs.Close();
-            fs.Dispose();
 
-            DfuFile dfuFile = new();
-            DfuImage dfuImage = new();
-            dfuImage.TargetPrefix.TargetName = GetCleanName(dfuName);
-            ImageElement imageElement = new();
-            imageElement.Data = binFile.ToArray();
-            dfuImage.ImageElements.Add(imageElement);
             dfuFile.DfuImages.Add(dfuImage);
             dfuFile.DfuSuffix.FirmwareVersion = fwVersion;
             dfuFile.DfuSuffix.ProductId = pid;
@@ -116,17 +139,9 @@ namespace nanoFramework.Tools
             dfuImage.TargetPrefix.TargetName = "nanoFramework";
             foreach (var binFile in binFiles)
             {
-                using FileStream fs = new(binFile.FileName, FileMode.Open);
                 ImageElement imageElement = new();
-                imageElement.Data = new byte[fs.Length];
+                imageElement.Data.AddRange(File.ReadAllBytes(binFile.FileName));
                 imageElement.ElementAddress = binFile.Address;
-                if (fs.Read(imageElement.Data) <= 0)
-                {
-                    Console.WriteLine();
-                    Console.WriteLine($"ERROR: adding {binFile.FileName}");
-                    Console.WriteLine();
-                    return false;
-                }
 
                 Console.WriteLine($"Adding file to image: {binFile.FileName}");
                 dfuImage.ImageElements.Add(imageElement);

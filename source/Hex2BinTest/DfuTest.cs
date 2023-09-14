@@ -7,6 +7,7 @@ using System;
 using Xunit;
 using nanoFramework.Tools;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 
 namespace Hex2BinTest
 {
@@ -81,7 +82,7 @@ namespace Hex2BinTest
         public void TestImageElement()
         {
             // Arrange
-            ImageElement imageElement = new ImageElement() { ElementAddress = 0x12345678, Data = new byte[] { 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF } };
+            ImageElement imageElement = new ImageElement() { ElementAddress = 0x12345678, Data = new List<byte>() { 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF } };
             // Act
             var ser = imageElement.Serialize();
             var address = BinaryPrimitives.ReadUInt32LittleEndian(ser.AsSpan(0, 4));
@@ -89,7 +90,7 @@ namespace Hex2BinTest
             // Assert
             Assert.Equal(imageElement.ElementAddress, address);
             Assert.Equal(imageElement.ElementSize, size);
-            Assert.Equal((uint)imageElement.Data.Length, size);
+            Assert.Equal((uint)imageElement.Data.Count, size);
             Assert.Equal(0x12, ser[8]);
             Assert.Equal(0xEF, ser[15]);
         }
@@ -103,7 +104,7 @@ namespace Hex2BinTest
             dfuImage.TargetPrefix.TargetName = "Ellerbach" ;
             for (int i = 0; i < 5; i++)
             {
-                var imageElement = new ImageElement() { ElementAddress = (uint)(16 * i), Data = new byte[] { 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF } };
+                var imageElement = new ImageElement() { ElementAddress = (uint)(16 * i), Data = new List<byte>() { 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF } };
                 dfuImage.ImageElements.Add(imageElement);
             }
             dfuImage.TargetPrefix.NumberOfElements = (uint)dfuImage.ImageElements.Count;

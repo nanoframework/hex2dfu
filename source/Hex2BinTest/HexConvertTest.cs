@@ -67,7 +67,7 @@ namespace Hex2BinTest
             HexFormat hex = new HexFormat(extended);
             // Assert
             Assert.True(hex.IsValidRecord);
-            Assert.Equal(HexFieldType.ExtendedAddress, hex.HexFieldType);
+            Assert.Equal(HexFieldType.ExtendedSegmentAddress, hex.HexFieldType);
         }
 
     }

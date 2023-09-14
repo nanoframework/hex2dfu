@@ -23,21 +23,21 @@ namespace nanoFramework.Tools
         /// <summary>
         /// Extended Address
         /// </summary>
-        ExtendedAddress = 2,
+        ExtendedSegmentAddress = 2,
 
         /// <summary>
         /// Start Segment Address Record
         /// </summary>
-        StartSegmentAddressRecord = 3,
+        StartSegmentAddress = 3,
 
         /// <summary>
         /// Extended Linear Address Record
         /// </summary>
-        ExtendedLinearAddressRecord = 4,
+        ExtendedLinearAddress = 4,
 
         /// <summary>
         /// Start Linear Address Record
         /// </summary>
-        StartLinearAddressRecord = 5,
+        StartLinearAddress = 5,
     }
 }
