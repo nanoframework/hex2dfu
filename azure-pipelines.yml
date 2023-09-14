@@ -149,7 +149,7 @@ jobs:
       and(
         succeeded(),
         eq(variables['System.PullRequest.PullRequestId'], ''),
-        startsWith(variables['Build.SourceBranch'], 'refs/heads/main'),
+        startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
       )
     inputs:
       gitHubConnection: 'github.com_nano-$(System.TeamProject)'
