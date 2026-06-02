@@ -100,14 +100,14 @@ jobs:
     inputs:
       testSelector: 'testAssemblies'
       testAssemblyVer2: |
-        **\$(BuildConfiguration)\**\*test*.dll
+        **\$(BuildConfiguration)\**\Hex2BinTest.dll
         !**\obj\**
         !**\bin\**\ref\**
         !**\*TestAdapter.dll
         !**\*testhost.dll
         !**\*TestPlatform*.dll
-        !**\xunit.runner.visualstudio.testadapter.dll
-        !**\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+        !**\xunit.*.dll
+        !**\xunit.*.dll
       searchFolder: '$(System.DefaultWorkingDirectory)'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
