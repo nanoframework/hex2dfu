@@ -70,5 +70,31 @@ namespace Hex2BinTest
             Assert.Equal(HexFieldType.ExtendedAddress, hex.HexFieldType);
         }
 
+        [Fact]
+        public void TestExtendedLinearAddressRecord()
+        {
+            // Arrange – ELA record, upper 16-bit segment = 0x0800 → base address 0x08000000
+            string ela = ":020000040800F2";
+            // Act
+            HexFormat hex = new HexFormat(ela);
+            // Assert
+            Assert.True(hex.IsValidRecord);
+            Assert.Equal(HexFieldType.ExtendedLinearAddressRecord, hex.HexFieldType);
+            Assert.Equal(2, hex.NumberOfBytes);
+            Assert.Equal(0x08, hex.Data[0]);
+            Assert.Equal(0x00, hex.Data[1]);
+        }
+
+        [Theory]
+        [InlineData(":020000040800F2")]   // ELA 0x08000000
+        [InlineData(":020000041000EA")]   // ELA 0x10000000
+        [InlineData(":020000040000FA")]   // ELA 0x00000000
+        public void TestExtendedLinearAddressRecordIsValid(string ela)
+        {
+            HexFormat hex = new HexFormat(ela);
+            Assert.True(hex.IsValidRecord);
+            Assert.Equal(HexFieldType.ExtendedLinearAddressRecord, hex.HexFieldType);
+        }
+
     }
 }
