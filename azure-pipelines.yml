@@ -69,17 +69,6 @@ jobs:
       targetType: 'inline'
       script: |
         dotnet publish $(Build.SourcesDirectory)\hex2dfu\hex2dfu.csproj -r win-x64 -p:PublishSingleFile=true --self-contained false -c Release
-  
-  - task: CopyFiles@2
-    displayName: Collecting deployable artifacts
-    condition: succeeded()
-    inputs:
-      SourceFolder: '$(Build.SourcesDirectory)\hex2dfu'
-      Contents: |
-        **\linux-x64\publish\*hex2dfu
-        **\win-x64\publish\*hex2*.exe
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      flattenFolders: true
 
   - task: VSBuild@1
     inputs:
@@ -114,6 +103,50 @@ jobs:
       diagnosticsEnabled: true
       vsTestVersion: toolsInstaller
       codeCoverageEnabled: true
+  
+  - task: CopyFiles@2
+    displayName: Collecting deployable artifacts
+    condition: succeeded()
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)\hex2dfu'
+      Contents: |
+        **\linux-x64\publish\*hex2dfu
+        **\win-x64\publish\*hex2*.exe
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      flattenFolders: true
+
+  - task: DotNetCoreCLI@2
+    displayName: Install Sign Client CLI
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
+
+  - pwsh: |
+      .\sign code azure-key-vault `
+      "**/hex2*.*" `
+      --base-directory "$(Build.ArtifactStagingDirectory)" `
+      --publisher-name ".NET nanoFramework" `
+      --description "nanoFramework.hex2dfu" `
+      --description-url "https://github.com/$env:Build_Repository_Name" `
+      --azure-key-vault-tenant-id "$(SignTenantId)" `
+      --azure-key-vault-client-id "$(SignClientId)" `
+      --azure-key-vault-client-secret "$(SignClientSecret)" `
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+      --azure-key-vault-url "$(SignKeyVaultUrl)" `
+      --timestamp-url http://timestamp.digicert.com
+    displayName: Sign nanoFramework.hex2dfu assemblies
+    continueOnError: true
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
 
   # publish artifacts (only possible if this is not a PR originated on a fork)
   - task: PublishBuildArtifacts@1
@@ -121,7 +154,7 @@ jobs:
     condition: >-
       and(
         succeeded(),
-        ne(variables['system.pullrequest.isfork'], true)
+        eq(variables['System.PullRequest.PullRequestId'], '')
       )
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
