@@ -94,7 +94,7 @@ jobs:
     inputs:
       versionSelector: latestStable
 
-  - task: VSTest@2
+  - task: VSTest@3
     condition: succeeded()
     displayName: 'Running tests'
     inputs:
