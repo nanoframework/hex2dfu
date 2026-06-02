@@ -26,11 +26,17 @@ jobs:
     vmImage: 'windows-latest'
 
   variables:
-    DOTNET_NOLOGO: true
-    buildPlatform: 'x64'
-    buildConfiguration: 'Release'
-    solution: 'nanoFramework.Tools.Hex2Dfu.sln'
-    toolName: 'HEX2DFU utility'
+    - group: sign-client-credentials
+    - name: DOTNET_NOLOGO
+      value: true
+    - name: buildPlatform
+      value: 'x64'
+    - name: buildConfiguration
+      value: 'Release'
+    - name: solution
+      value: 'nanoFramework.Tools.Hex2Dfu.sln'
+    - name: toolName
+      value: 'HEX2DFU utility'
 
   steps:
 
